@@ -3,10 +3,7 @@ package de.mr_pine.taskclicker.scheduler;
 import me.bechberger.ebpf.annotations.Size;
 import me.bechberger.ebpf.annotations.Type;
 import me.bechberger.ebpf.annotations.Unsigned;
-import me.bechberger.ebpf.annotations.bpf.BPF;
-import me.bechberger.ebpf.annotations.bpf.BPFFunction;
-import me.bechberger.ebpf.annotations.bpf.BPFMapDefinition;
-import me.bechberger.ebpf.annotations.bpf.Property;
+import me.bechberger.ebpf.annotations.bpf.*;
 import me.bechberger.ebpf.bpf.*;
 import me.bechberger.ebpf.bpf.map.BPFBloomFilter;
 import me.bechberger.ebpf.bpf.map.BPFQueue;
@@ -105,7 +102,7 @@ public abstract class TaskClickerScheduler extends BPFProgram implements Schedul
 
         if (!isEnqueued) {
             @Unsigned int baseSlice = 5_000_000;
-            scx_bpf_dispatch(p, BLACKLISTED_DSQ_ID, baseSlice / scx_bpf_dsq_nr_queued(BLACKLISTED_DSQ_ID), 1033);
+            scx_bpf_dsq_insert(p, BLACKLISTED_DSQ_ID, baseSlice / scx_bpf_dsq_nr_queued(BLACKLISTED_DSQ_ID), 1033);
         }
     }
 
@@ -120,12 +117,28 @@ public abstract class TaskClickerScheduler extends BPFProgram implements Schedul
             Ptr<TaskDefinitions.task_struct> task = bpf_task_from_pid(pid);
             if (task != null) {
                 @Unsigned int baseSlice = 5_000_000;
-                scx_bpf_dispatch(task, scx_dsq_id_flags.SCX_DSQ_GLOBAL.value(), baseSlice / scx_bpf_dsq_nr_queued(scx_dsq_id_flags.SCX_DSQ_GLOBAL.value()), 0);
+                scx_bpf_dsq_insert(task, scx_dsq_id_flags.SCX_DSQ_GLOBAL.value(), baseSlice / scx_bpf_dsq_nr_queued(scx_dsq_id_flags.SCX_DSQ_GLOBAL.value()), 0);
                 bpf_task_release(task);
             }
         }
 
-        scx_bpf_consume(BLACKLISTED_DSQ_ID); // TODO: After 6.15: renamed to scx_bpf_dsq_move_to_local
+        scx_bpf_dsq_move_to_local(BLACKLISTED_DSQ_ID); // TODO: After 6.15: renamed to scx_bpf_dsq_move_to_local
+    }
+
+    @BuiltinBPFFunction
+    public static @NotUsableInJava boolean scx_bpf_dsq_move_to_local(@Unsigned long dsq_id) {
+        throw new MethodIsBPFRelatedFunction();
+    }
+
+    @BuiltinBPFFunction
+    public static void scx_bpf_dsq_insert(Ptr<TaskDefinitions.task_struct> p, @Unsigned long dsq_id, @Unsigned long slice, @Unsigned long enq_flags) {
+        throw new MethodIsBPFRelatedFunction();
+    }
+
+    @NotUsableInJava
+    @BuiltinBPFFunction
+    public static void scx_bpf_dispatch(Ptr<TaskDefinitions.task_struct> p, @Unsigned long dsq_id, @Unsigned long slice, @Unsigned long enq_flags) {
+        throw new MethodIsBPFRelatedFunction();
     }
 
     void queueLoop(Consumer<ClickableTask> taskConsumer, IntConsumer syscallUpdater) {

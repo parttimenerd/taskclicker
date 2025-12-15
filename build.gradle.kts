@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -29,8 +30,8 @@ dependencies {
     // With compose.desktop.common you will also lose @Preview functionality
     implementation(compose.desktop.currentOs)
     implementation(compose.components.resources)
-    implementation("me.bechberger:bpf:0.1.2")
-    annotationProcessor("me.bechberger:bpf:0.1.2")
+    implementation("me.bechberger:bpf:0.1.3")
+    annotationProcessor("me.bechberger:bpf:0.1.3")
     implementation("org.jetbrains.androidx.navigation:navigation-compose:2.8.0-alpha12")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.2")

@@ -3,10 +3,7 @@ package de.mr_pine.taskclicker.scheduler;
 import me.bechberger.ebpf.annotations.Size;
 import me.bechberger.ebpf.annotations.Type;
 import me.bechberger.ebpf.annotations.Unsigned;
-import me.bechberger.ebpf.annotations.bpf.BPF;
-import me.bechberger.ebpf.annotations.bpf.BPFFunction;
-import me.bechberger.ebpf.annotations.bpf.BPFMapDefinition;
-import me.bechberger.ebpf.annotations.bpf.Property;
+import me.bechberger.ebpf.annotations.bpf.*;
 import me.bechberger.ebpf.bpf.BPFJ;
 import me.bechberger.ebpf.bpf.BPFProgram;
 import me.bechberger.ebpf.bpf.GlobalVariable;
@@ -52,8 +49,13 @@ public abstract class TaskTestScheduler extends BPFProgram implements Scheduler 
         boolean blacklisted = isBlacklisted(p);
         if (blacklisted) {
             @Unsigned int baseSlice = 5_000_000;
-            scx_bpf_dispatch(p, scx_dsq_id_flags.SCX_DSQ_GLOBAL.value(), baseSlice / scx_bpf_dsq_nr_queued(scx_dsq_id_flags.SCX_DSQ_GLOBAL.value()), 1033);
+            scx_bpf_dsq_insert(p, scx_dsq_id_flags.SCX_DSQ_GLOBAL.value(), baseSlice / scx_bpf_dsq_nr_queued(scx_dsq_id_flags.SCX_DSQ_GLOBAL.value()), 1033);
         }
+    }
+
+    @BuiltinBPFFunction
+    public static void scx_bpf_dsq_insert(Ptr<TaskDefinitions.task_struct> p, @Unsigned long dsq_id, @Unsigned long slice, @Unsigned long enq_flags) {
+        throw new MethodIsBPFRelatedFunction();
     }
 
     public static void run(int[] pidBlacklist) {
